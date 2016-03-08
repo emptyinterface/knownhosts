@@ -26,10 +26,9 @@ import (
 	"strconv"
 	"strings"
 
-	gossh "github.com/coreos/fleet/Godeps/_workspace/src/golang.org/x/crypto/ssh"
-
 	"github.com/coreos/fleet/log"
 	"github.com/coreos/fleet/pkg"
+	"golang.org/x/crypto/ssh"
 )
 
 const (
@@ -75,7 +74,7 @@ var (
 	ErrUnmatchKey  = errors.New("host key mismatch")
 )
 
-// HostKeyChecker implements the gossh.HostKeyChecker interface
+// HostKeyChecker implements the ssh.HostKeyChecker interface
 // It is used for key validation during the cryptographic handshake
 type HostKeyChecker struct {
 	m         HostKeyManager
@@ -94,7 +93,7 @@ func NewHostKeyChecker(m HostKeyManager) *HostKeyChecker {
 // It returns any error encountered while checking the public key. A nil return
 // value indicates that the key was either successfully verified (against an
 // existing known_hosts entry), or accepted by the user as a new key.
-func (kc *HostKeyChecker) Check(addr string, remote net.Addr, key gossh.PublicKey) error {
+func (kc *HostKeyChecker) Check(addr string, remote net.Addr, key ssh.PublicKey) error {
 	remoteAddr, err := kc.addrToHostPort(remote.String())
 	if err != nil {
 		return err
@@ -183,9 +182,9 @@ func (kc *HostKeyChecker) addrToHostPort(a string) (string, error) {
 type HostKeyManager interface {
 	String() string
 	// GetHostKeys returns a map from host patterns to a list of PublicKeys
-	GetHostKeys() (map[string][]gossh.PublicKey, error)
+	GetHostKeys() (map[string][]ssh.PublicKey, error)
 	// put new host key under management
-	PutHostKey(addr string, hostKey gossh.PublicKey) error
+	PutHostKey(addr string, hostKey ssh.PublicKey) error
 }
 
 // HostKeyFile is an implementation of HostKeyManager that saves and loads
@@ -203,14 +202,14 @@ func (f *HostKeyFile) String() string {
 	return f.path
 }
 
-func (f *HostKeyFile) GetHostKeys() (map[string][]gossh.PublicKey, error) {
+func (f *HostKeyFile) GetHostKeys() (map[string][]ssh.PublicKey, error) {
 	in, err := os.Open(f.path)
 	if err != nil {
 		return nil, err
 	}
 	defer in.Close()
 
-	hostKeys := make(map[string][]gossh.PublicKey)
+	hostKeys := make(map[string][]ssh.PublicKey)
 	n := 0
 	s := bufio.NewScanner(in)
 	for s.Scan() {
@@ -237,9 +236,9 @@ func (f *HostKeyFile) GetHostKeys() (map[string][]gossh.PublicKey, error) {
 }
 
 // parseKnownHostsLine parses a line from a known hosts file.  It returns a
-// string containing the hosts section of the line, a gossh.PublicKey parsed
+// string containing the hosts section of the line, a ssh.PublicKey parsed
 // from the line, and any error encountered during the parsing.
-func parseKnownHostsLine(line []byte) (string, gossh.PublicKey, error) {
+func parseKnownHostsLine(line []byte) (string, ssh.PublicKey, error) {
 
 	// Skip any leading whitespace.
 	line = bytes.TrimLeft(line, "\t ")
@@ -268,7 +267,7 @@ func parseKnownHostsLine(line []byte) (string, gossh.PublicKey, error) {
 	}
 
 	// Finally, actually try to extract the key.
-	key, _, _, _, err := gossh.ParseAuthorizedKey(keyBytes)
+	key, _, _, _, err := ssh.ParseAuthorizedKey(keyBytes)
 	if err != nil {
 		return "", nil, fmt.Errorf("error parsing key: %v", err)
 	}
@@ -276,7 +275,7 @@ func parseKnownHostsLine(line []byte) (string, gossh.PublicKey, error) {
 	return hosts, key, nil
 }
 
-func (f *HostKeyFile) PutHostKey(addr string, hostKey gossh.PublicKey) error {
+func (f *HostKeyFile) PutHostKey(addr string, hostKey ssh.PublicKey) error {
 	// Make necessary directories if needed
 	err := os.MkdirAll(path.Dir(f.path), 0700)
 	if err != nil {
@@ -296,8 +295,8 @@ func (f *HostKeyFile) PutHostKey(addr string, hostKey gossh.PublicKey) error {
 	return nil
 }
 
-func renderHostLine(addr string, key gossh.PublicKey) []byte {
-	keyByte := gossh.MarshalAuthorizedKey(key)
+func renderHostLine(addr string, key ssh.PublicKey) []byte {
+	keyByte := ssh.MarshalAuthorizedKey(key)
 	// allocate line space in advance
 	length := len(addr) + 1 + len(keyByte)
 	line := make([]byte, 0, length)
@@ -312,11 +311,11 @@ func renderHostLine(addr string, key gossh.PublicKey) []byte {
 // algoString returns a short-name representation of an algorithm type
 func algoString(algo string) string {
 	switch algo {
-	case gossh.KeyAlgoRSA:
+	case ssh.KeyAlgoRSA:
 		return "RSA"
-	case gossh.KeyAlgoDSA:
+	case ssh.KeyAlgoDSA:
 		return "DSA"
-	case gossh.KeyAlgoECDSA256, gossh.KeyAlgoECDSA384, gossh.KeyAlgoECDSA521:
+	case ssh.KeyAlgoECDSA256, ssh.KeyAlgoECDSA384, ssh.KeyAlgoECDSA521:
 		return "ECDSA"
 	}
 	return algo

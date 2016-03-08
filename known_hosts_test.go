@@ -23,7 +23,7 @@ import (
 	"syscall"
 	"testing"
 
-	gossh "github.com/coreos/fleet/Godeps/_workspace/src/golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh"
 )
 
 const (
@@ -56,7 +56,7 @@ func TestHostKeyChecker(t *testing.T) {
 		t.Fatalf("checker should succeed for %v: %v", tcpAddr.String(), err)
 	}
 
-	wrongKey, _, _, _, _ := gossh.ParseAuthorizedKey([]byte(wrongAuthorizedKey))
+	wrongKey, _, _, _, _ := ssh.ParseAuthorizedKey([]byte(wrongAuthorizedKey))
 	if err := checker.Check("localhost", tcpAddr, wrongKey); err != ErrUnmatchKey {
 		t.Fatalf("checker should fail with %v", ErrUnmatchKey)
 	}
@@ -98,8 +98,8 @@ func TestHostLine(t *testing.T) {
 	if addr != addrInHostLine {
 		t.Fatalf("addr is %v instead of %v", addr, addrInHostLine)
 	}
-	if key.Type() != gossh.KeyAlgoRSA {
-		t.Fatalf("key type is %v instead of %v", key.Type(), gossh.KeyAlgoRSA)
+	if key.Type() != ssh.KeyAlgoRSA {
+		t.Fatalf("key type is %v instead of %v", key.Type(), ssh.KeyAlgoRSA)
 	}
 
 	line := renderHostLine(addr, key)
@@ -193,11 +193,11 @@ func TestAlgorithmString(t *testing.T) {
 		in  string
 		out string
 	}{
-		{gossh.KeyAlgoRSA, "RSA"},
-		{gossh.KeyAlgoDSA, "DSA"},
-		{gossh.KeyAlgoECDSA256, "ECDSA"},
-		{gossh.KeyAlgoECDSA384, "ECDSA"},
-		{gossh.KeyAlgoECDSA521, "ECDSA"},
+		{ssh.KeyAlgoRSA, "RSA"},
+		{ssh.KeyAlgoDSA, "DSA"},
+		{ssh.KeyAlgoECDSA256, "ECDSA"},
+		{ssh.KeyAlgoECDSA384, "ECDSA"},
+		{ssh.KeyAlgoECDSA521, "ECDSA"},
 		{"UNKNOWN", "UNKNOWN"},
 	}
 	for _, test := range tests {
