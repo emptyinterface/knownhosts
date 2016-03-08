@@ -29,11 +29,11 @@ import (
 const (
 	hostLine           = "192.0.2.10:2222 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3y6omlFuiBQfV2lqwqt3EuQHXLxvghhdfyZ840je6pRNnidgfCTmzNgIjmqdfkCwIthh+fhArkFPWIT6dRwim4hhtbpum7AzAay1h6mmLsmJVJQ/nK+zLwQ4JHs6+Tfj6F3iXJyrZR9JMTeLLs0mEd+VNHbX3LxIh7nXk5IM0G5LP2nnIYG96Luu4WunJzFsDVFLgxMl66T9VBYeAIbfUeCoCDYMmJK7kTleLD1XfL2KdoHkh0t9fkJVA5XJUZJPh3PJw+mT7eP3meAMc8EzyCGcRm+5GQzAe2/M4dNaZ5iqF7YIO7HJpA8UyAE+Dgd9WqhoBX/6ItdcuDXVAy63v\n"
 	addrInHostLine     = "192.0.2.10:2222"
-	hostFile           = "../fixtures/known_hosts"
+	hostFile           = "testdata/known_hosts"
 	wrongAuthorizedKey = "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAzJjWHWVDum5WukrlWTYPtPN/Ny8BTXzhHFf89vejOQukQNMPcoohjSOBkrFZXQMLQ0s/RqpTKly1omdo8TgfUE5f7rgegwPhzleuxw/Q/XJJJiiCi7KHSQv9Vs+fNlMr14VsF8JStpKei5jD/moM1Pk/q5asYtY9I4+0rJRq1KbFPR4gTGlCqZApvJWfEHlgQxwlug6zFKaVy3vG04ggvS4GREd6XQeVjAE5cPY31Yrtdgll/BETHAxvy1+ucWxiFy6BNrqPni6XSOkSZc44EEIj4TCRAQdv5nZyd2VKPQHENYLDaC9KkxllZdqNuJuXx9stRv8auwOFRnF+JSk+7Q=="
-	hostFileBackup     = "../fixtures/known_hosts_backup"
-	wrongHostFile      = "../fixtures/wrong_known_hosts"
-	badHostFile        = "../fixtures/bad_known_hosts"
+	hostFileBackup     = "testdata/known_hosts_backup"
+	wrongHostFile      = "testdata/wrong_known_hosts"
+	badHostFile        = "testdata/bad_known_hosts"
 )
 
 func trustHostAlways(addr, algo, fingerprint string) bool {
