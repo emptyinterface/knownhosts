@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	DefaultKnownHostsFile = "~/.fleetctl/known_hosts"
+	DefaultKnownHostsFile = "~/.ssh/known_hosts"
 
 	sshDefaultPort = 22  // ssh.h
 	sshHashDelim   = "|" // hostfile.h
