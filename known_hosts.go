@@ -41,12 +41,13 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/user"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/coreos/fleet/log"
-	"github.com/coreos/fleet/pkg"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -214,7 +215,7 @@ type HostKeyFile struct {
 
 // NewHostKeyFile returns a new HostKeyFile using the given file path
 func NewHostKeyFile(path string) *HostKeyFile {
-	return &HostKeyFile{pkg.ParseFilepath(path)}
+	return &HostKeyFile{resolvePath(path)}
 }
 
 func (f *HostKeyFile) String() string {
@@ -345,4 +346,18 @@ func md5String(md5Sum [16]byte) string {
 	md5Str := fmt.Sprintf("% x", md5Sum)
 	md5Str = strings.Replace(md5Str, " ", ":", -1)
 	return md5Str
+}
+
+// resolve environment variables and ~ in paths
+func resolvePath(path string) string {
+
+	if strings.ContainsRune(path, '$') {
+		path = os.ExpandEnv(path)
+	}
+	if strings.HasPrefix(path, "~") {
+		u, _ := user.Current()
+		path = filepath.Join(u.HomeDir, path[1:])
+	}
+	return path
+
 }
