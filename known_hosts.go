@@ -352,10 +352,12 @@ func resolvePath(path string) string {
 	if strings.ContainsRune(path, '$') {
 		path = os.ExpandEnv(path)
 	}
+
 	if strings.HasPrefix(path, "~") {
 		u, _ := user.Current()
-		path = filepath.Join(u.HomeDir, path[1:])
+		return filepath.Join(u.HomeDir, path[1:])
 	}
-	return path
+
+	return filepath.Clean(path)
 
 }
