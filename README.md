@@ -9,5 +9,5 @@ The [example](https://github.com/emptyinterface/known_hosts/tree/master/example)
 ##LICENSE
 Apache 2.0
 
-_This package was derived from [github.com/coreos/fleet/ssh](https://github.com/coreos/fleet/tree/master/ssh) and updated to import [golang.org/x/crypto/ssh](https://golang.org/x/crypto/ssh) directly instead of the locally vendored verison.  The local vendor namespacing prohibited use of the library outside of the Fleet project.  There is an open [issue](https://github.com/coreos/fleet/issues/1477) regarding this vendoring strategy. The proxy, tunnel, and remote execution functionality from the original package has been removed._
+_This package was derived from [github.com/coreos/fleet/ssh](https://github.com/coreos/fleet/tree/master/ssh) and updated to import [golang.org/x/crypto/ssh](https://golang.org/x/crypto/ssh) directly instead of the locally vendored verison.  The local vendor namespacing prohibited use of the library outside of the Fleet project.  There is an open [issue](https://github.com/coreos/fleet/issues/1477) regarding this vendoring strategy. The proxy, tunnel, remote execution functionality, and external dependencies on fleet packages have been removed._
 
