@@ -39,6 +39,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/user"
@@ -47,7 +48,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coreos/fleet/log"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -125,7 +125,7 @@ func (kc *HostKeyChecker) Check(addr string, remote net.Addr, key ssh.PublicKey)
 	hostKeys, err := kc.m.GetHostKeys()
 	_, ok := err.(*os.PathError)
 	if err != nil && !ok {
-		log.Errorf("Failed to read known_hosts file %v: %v", kc.m.String(), err)
+		log.Printf("Failed to read known_hosts file %v: %v", kc.m.String(), err)
 	}
 
 	mismatched := false
@@ -175,14 +175,12 @@ func (kc *HostKeyChecker) addrToHostPort(a string) (string, error) {
 	}
 	host, p, err := net.SplitHostPort(a)
 	if err != nil {
-		log.Debugf("Unable to parse addr %s: %v", a, err)
-		return "", err
+		return "", fmt.Errorf("Unable to parse addr %s: %v", a, err)
 	}
 
 	port, err := strconv.Atoi(p)
 	if err != nil {
-		log.Debugf("Error parsing port %s: %v", p, err)
-		return "", err
+		return "", fmt.Errorf("Error parsing port %s: %v", p, err)
 	}
 
 	// Default port should be omitted from the entry.
@@ -239,7 +237,7 @@ func (f *HostKeyFile) GetHostKeys() (map[string][]ssh.PublicKey, error) {
 		hosts, key, err := parseKnownHostsLine(line)
 
 		if err != nil {
-			log.Warningf("%v:%d - %v\n", f.path, n, err)
+			log.Printf("%v:%d - %v\n", f.path, n, err)
 			continue
 		}
 
