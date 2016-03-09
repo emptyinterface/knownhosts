@@ -38,6 +38,8 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"os/user"
+	"path/filepath"
 	"strconv"
 	"syscall"
 	"testing"
@@ -61,6 +63,42 @@ func trustHostAlways(addr, algo, fingerprint string) bool {
 
 func trustHostNever(addr, algo, fingerprint string) bool {
 	return false
+}
+
+func TestAskToTrustHost(t *testing.T) {
+
+	responses := map[string]bool{
+		"Y":        true,
+		"YES":      true,
+		"Yes":      true,
+		"y":        true,
+		"yes":      true,
+		"N":        false,
+		"NO":       false,
+		"No":       false,
+		"n":        false,
+		"no":       false,
+		"anythign": false,
+		"":         false,
+	}
+
+	for resp, expected := range responses {
+		// using a pipe to simulate input from stdin
+		r, w, err := os.Pipe()
+		if err != nil {
+			t.Error(err)
+		}
+		stdin := os.Stdin
+		os.Stdin = r
+		w.WriteString(resp)
+		w.Close()
+		if actual := askToTrustHost("addr", "algo", "fingerprint"); actual != expected {
+			t.Errorf("Expected %v, got %v for %q", expected, actual, resp)
+		}
+		r.Close()
+		os.Stdin = stdin
+	}
+
 }
 
 // TestHostKeyChecker tests to check existing key
@@ -290,4 +328,40 @@ func TestAddrToHostPort(t *testing.T) {
 			t.Errorf("bad hostport conversion for %s: got %s, want %s", a.in, got, a.out)
 		}
 	}
+}
+
+func TestResolvePath(t *testing.T) {
+
+	usr, err := user.Current()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(usr.HomeDir) == 0 {
+		t.Error("Unable to determine home dir for user")
+	}
+
+	if err := os.Setenv("TESTA", "a"); err != nil {
+		t.Error(err)
+	}
+	if err := os.Setenv("TESTB", "b"); err != nil {
+		t.Error(err)
+	}
+	if err := os.Setenv("TESTC", "c"); err != nil {
+		t.Error(err)
+	}
+
+	paths := map[string]string{
+		"~/.ssh":                     filepath.Join(usr.HomeDir, ".ssh"),
+		"$TESTA/$TESTB/$TESTC/.ssh/": "a/b/c/.ssh",
+		"/home/~/$TESTA/":            "/home/~/a",
+		"~/$TESTA/.ssh/":             filepath.Join(usr.HomeDir, "/a/.ssh"),
+	}
+
+	for path, expected := range paths {
+		if actual := resolvePath(path); actual != expected {
+			t.Errorf("Expected %q, got %q", expected, actual)
+		}
+	}
+
 }
