@@ -52,6 +52,7 @@ import (
 )
 
 const (
+	// DefaultKnownHostsFile is the default location of the known hosts file.
 	DefaultKnownHostsFile = "~/.ssh/known_hosts"
 
 	sshDefaultPort = 22  // ssh.h
@@ -90,8 +91,12 @@ func askToTrustHost(addr, algo, fingerprint string) bool {
 }
 
 var (
+	// ErrUntrustHost is returned when a host is not found in the
+	// authorized hosts file.
 	ErrUntrustHost = errors.New("unauthorized host")
-	ErrUnmatchKey  = errors.New("host key mismatch")
+	// ErrUnmatchKey is returned when a key does not match the host
+	// matched in the authorized hosts file.
+	ErrUnmatchKey = errors.New("host key mismatch")
 )
 
 // HostKeyChecker implements the ssh.HostKeyChecker interface
@@ -220,6 +225,9 @@ func (f *HostKeyFile) String() string {
 	return f.path
 }
 
+// GetHostKeys returns a map of the hosts listed in the known hosts file
+// that were able to be parsed and their ssh.PublicKeys.  Parsing errors
+// are logged and not returned.  Only file open errors are returned.
 func (f *HostKeyFile) GetHostKeys() (map[string][]ssh.PublicKey, error) {
 	in, err := os.Open(f.path)
 	if err != nil {
@@ -293,6 +301,8 @@ func parseKnownHostsLine(line []byte) (string, ssh.PublicKey, error) {
 	return hosts, key, nil
 }
 
+// PutHostKey adds a host and ssh.PublicKey to the known hosts file
+// and creates any directories or the known hosts file, if not found.
 func (f *HostKeyFile) PutHostKey(addr string, hostKey ssh.PublicKey) error {
 	// Make necessary directories if needed
 	err := os.MkdirAll(path.Dir(f.path), 0700)
